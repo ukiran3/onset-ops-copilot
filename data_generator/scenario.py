@@ -17,7 +17,11 @@ SCENES = ["12A", "12B", "14", "15C"]
 # Long enough that scene 12A -- the one the demo/architecture doc's example
 # question ("why is scene 12A behind schedule?") is about -- is still active
 # through the full backfill window and any reasonable live-demo duration.
-SCENE_DURATION_S = 5 * 3600
+# (Was 5h; a single dev/demo session ran the live loop past that without a
+# restart, which silently rolled the "current scene" over to 12B and made
+# scene_burn_minutes{scene="12A"} stop getting fresh samples. 100h so this
+# doesn't recur for the rest of the hackathon.)
+SCENE_DURATION_S = 100 * 3600
 
 GENERATORS = ["genny-1", "genny-2"]
 MICS = ["wireless-mic-1", "wireless-mic-2", "wireless-mic-3"]
