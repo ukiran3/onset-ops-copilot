@@ -100,22 +100,30 @@ cd frontend && streamlit run app.py
 Two Cloud Run services:
 
 ```bash
-# 1. mcp-grafana, as its own HTTP service (Cloud Run can't nest Docker containers)
+# 0. a dedicated runtime service account, used by both services
+gcloud iam service-accounts create onset-ops-frontend
+
+# 1. mcp-grafana, as its own HTTP service (Cloud Run can't nest Docker containers).
+#    Omitting --allow-unauthenticated leaves it on Cloud Run's default IAM auth.
 gcloud run deploy mcp-grafana \
   --image=docker.io/grafana/mcp-grafana:latest \
-  --port=8080 --no-allow-unauthenticated \
+  --port=8080 \
   --set-env-vars="GRAFANA_URL=...,GRAFANA_SERVICE_ACCOUNT_TOKEN=..." \
   --args="-t=streamable-http,-address=:8080,-allowed-hosts=*,-allowed-origins=*"
+
+gcloud run services add-iam-policy-binding mcp-grafana \
+  --member="serviceAccount:onset-ops-frontend@<project>.iam.gserviceaccount.com" \
+  --role="roles/run.invoker"
+gcloud projects add-iam-policy-binding <project> \
+  --member="serviceAccount:onset-ops-frontend@<project>.iam.gserviceaccount.com" \
+  --role="roles/aiplatform.user"
 
 # 2. the frontend, pointed at that service
 gcloud run deploy onset-ops-frontend \
   --source=. --port=8080 --allow-unauthenticated \
-  --service-account=<runtime-sa> \
-  --env-vars-file=<your env values, including MCP_GRAFANA_URL from step 1>
+  --service-account=onset-ops-frontend@<project>.iam.gserviceaccount.com \
+  --env-vars-file=<your env values, including MCP_GRAFANA_URL from step 1's Service URL>
 ```
-
-The runtime service account needs `roles/run.invoker` on `mcp-grafana` and `roles/aiplatform.user`
-at the project level.
 
 ## License
 
