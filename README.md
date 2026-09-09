@@ -7,7 +7,7 @@ grounded in real, live Grafana Cloud data via the Grafana MCP server.
 Built for [Agentic Cinema: The Blockbuster Hackathon](https://agentic-cinema.devpost.com/) —
 **Grafana Labs** partner track.
 
-**Live demo:** _[add hosted URL here]_
+**Live demo:** https://onset-ops-frontend-154756890593.us-central1.run.app
 **Demo video:** _[add YouTube/Vimeo link here]_
 
 ## What it does
