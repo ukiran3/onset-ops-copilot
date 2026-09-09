@@ -14,6 +14,12 @@ import requests
 PROM_UID = "grafanacloud-prom"
 LOKI_UID = "grafanacloud-logs"
 
+# Module-level state survives Streamlit reruns within the same process (the
+# script re-executes, but imported modules don't reload) -- reusing one
+# connection here avoids paying a fresh-connection cost on every single
+# query, of which a single page render can fire a dozen.
+_session = requests.Session()
+
 
 def _headers() -> dict:
     return {"Authorization": f"Bearer {config.GRAFANA_SERVICE_ACCOUNT_TOKEN}"}
@@ -22,7 +28,7 @@ def _headers() -> dict:
 def prom_range(expr: str, lookback_s: int = 5400, step_s: int = 30) -> dict:
     """Returns {label_tuple: [(unix_ts, float_value), ...]} per series."""
     now = int(time.time())
-    resp = requests.get(
+    resp = _session.get(
         f"{config.GRAFANA_STACK_URL}/api/datasources/proxy/uid/{PROM_UID}/api/v1/query_range",
         headers=_headers(),
         params={"query": expr, "start": now - lookback_s, "end": now, "step": step_s},
@@ -40,7 +46,7 @@ def prom_range(expr: str, lookback_s: int = 5400, step_s: int = 30) -> dict:
 
 def prom_instant(expr: str) -> dict:
     """Returns {label_tuple: float_value} for the latest value per series."""
-    resp = requests.get(
+    resp = _session.get(
         f"{config.GRAFANA_STACK_URL}/api/datasources/proxy/uid/{PROM_UID}/api/v1/query",
         headers=_headers(),
         params={"query": expr},
@@ -59,7 +65,7 @@ def prom_instant(expr: str) -> dict:
 def loki_range(logql: str, lookback_s: int = 21600, limit: int = 200) -> list[dict]:
     """Returns log lines newest-first: [{"ts_ns": int, "line": str, "labels": dict}, ...]."""
     now_ns = int(time.time() * 1e9)
-    resp = requests.get(
+    resp = _session.get(
         f"{config.GRAFANA_STACK_URL}/api/datasources/proxy/uid/{LOKI_UID}/loki/api/v1/query_range",
         headers=_headers(),
         params={
@@ -83,7 +89,7 @@ def loki_range(logql: str, lookback_s: int = 21600, limit: int = 200) -> list[di
 
 
 def alerting_firing_count() -> int:
-    resp = requests.get(
+    resp = _session.get(
         f"{config.GRAFANA_STACK_URL}/api/alertmanager/grafana/api/v2/alerts",
         headers=_headers(),
         params={"active": "true"},

@@ -24,7 +24,6 @@ def view_ad():
     burn_val = next(iter(burn.values()), None)
     load = _instant('generator_load_pct{unit="genny-1"}')
     load_val = next(iter(load.values()), None)
-    firing = gc.alerting_firing_count() if _instant("up") is not None else 0
     try:
         firing = gc.alerting_firing_count()
     except Exception:
