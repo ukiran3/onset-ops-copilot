@@ -92,10 +92,10 @@ section[data-testid="stSidebar"] .stButton button {
   border-radius: 8px !important; padding: 10px 10px !important; letter-spacing: normal !important;
 }
 section[data-testid="stSidebar"] .stButton button[kind="secondary"] {
-  background: transparent !important; border: 1px solid transparent !important; color: var(--text-dim) !important;
+  background: var(--panel-2) !important; border: 1px solid var(--line) !important; color: var(--text-dim) !important;
 }
 section[data-testid="stSidebar"] .stButton button[kind="secondary"]:hover {
-  background: var(--panel-2) !important; color: var(--text) !important;
+  background: var(--panel) !important; border-color: var(--accent) !important; color: var(--text) !important;
 }
 section[data-testid="stSidebar"] .stButton button[kind="primary"] {
   background: var(--panel) !important; border: 1px solid var(--line) !important; color: var(--text) !important;

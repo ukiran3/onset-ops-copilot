@@ -106,13 +106,16 @@ def live_loop(prom: PrometheusRemoteWriter, loki: LokiClient, start_elapsed_s: f
         logs = scenario.build_logs_for_tick(elapsed, prev_elapsed, wall_ns, live_elapsed_s=live_elapsed)
         prev_elapsed = elapsed
 
-        prom.push(metrics)
-        if logs:
-            loki.push(logs)
-            for line in logs:
-                print(f"  [{line.labels}] {line.message}")
+        try:
+            prom.push(metrics)
+            if logs:
+                loki.push(logs)
+                for line in logs:
+                    print(f"  [{line.labels}] {line.message}")
+            print(f"tick: elapsed={elapsed:.0f}s live={live_elapsed:.0f}s pushed {len(metrics)} metrics")
+        except Exception as e:  # noqa: BLE001 -- a transient push failure must never kill the live loop
+            print(f"  WARNING: tick push failed, will retry next interval: {e}")
 
-        print(f"tick: elapsed={elapsed:.0f}s live={live_elapsed:.0f}s pushed {len(metrics)} metrics")
         time.sleep(interval_s)
 
 
