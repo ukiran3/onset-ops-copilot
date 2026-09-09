@@ -1,0 +1,16 @@
+# Google ADK on Vertex AI Agent Engine
+google-cloud-aiplatform[agent_engines,adk]>=1.101.0
+google-genai>=0.3.0
+
+# Synthetic data generator -> Grafana Cloud (Mimir/Prometheus + Loki)
+requests>=2.31.0
+python-snappy>=0.6.1
+protobuf>=4.25.0
+
+# Frontend
+streamlit>=1.38.0
+streamlit-autorefresh>=1.0.1
+plotly>=5.24.0
+
+# Shared
+python-dotenv>=1.0.1
