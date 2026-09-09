@@ -8,6 +8,12 @@ MICS = ["wireless-mic-1", "wireless-mic-2", "wireless-mic-3"]
 RF_ZONES = ["stage-3", "stage-7", "backlot"]
 GENERATORS = ["genny-1", "genny-2"]
 
+# The synthetic generator produces one continuous live timeline, not 22
+# distinct days of history -- so the day selector is real (it drives what's
+# shown), but honest: only CURRENT_DAY has live data to show.
+CURRENT_DAY = 4
+TOTAL_DAYS = 22
+
 
 def _instant(expr: str) -> dict:
     try:
@@ -16,7 +22,24 @@ def _instant(expr: str) -> dict:
         return {}
 
 
+def _guard_current_day(desk_name: str) -> bool:
+    """Returns True if the view should render normally. If a past/future
+    day is selected, shows an honest empty state and returns False -- this
+    demo's telemetry only exists for Day {CURRENT_DAY}."""
+    day = st.session_state.get("shoot_day", CURRENT_DAY)
+    if day == CURRENT_DAY:
+        return True
+    st.markdown(f"## {desk_name}")
+    st.info(
+        f"No telemetry recorded for Day {day}. This demo's live data covers "
+        f"Day {CURRENT_DAY} only — pick that day to see {desk_name}."
+    )
+    return False
+
+
 def view_ad():
+    if not _guard_current_day("Mission Control"):
+        return
     st.markdown("## Mission Control")
     st.caption("1st AD / UPM · live shoot-day ops")
 
@@ -91,6 +114,8 @@ def view_ad():
 
 
 def view_sound():
+    if not _guard_current_day("Sound Desk"):
+        return
     st.markdown("## Sound Desk")
     st.caption("Sound Mixer · ops_agent, audio lens")
 
@@ -127,6 +152,8 @@ def view_sound():
 
 
 def view_electric():
+    if not _guard_current_day("Electric Desk"):
+        return
     st.markdown("## Electric Desk")
     st.caption("Gaffer / Electric · ops_agent, power lens")
 
@@ -172,6 +199,8 @@ def view_electric():
 
 
 def view_continuity():
+    if not _guard_current_day("Continuity Desk"):
+        return
     st.markdown("## Continuity Desk")
     st.caption("Script Supervisor · continuity_agent")
 
